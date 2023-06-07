@@ -19,8 +19,9 @@ and one column that shows the **power consumption**.
 
 ### 1. Running on the 20 features with highest correlation to power consumption
 
-| Name                    | Training Set Score | Test Set Score |
-|-------------------------|-------------------|----------------|
-| Linear Regression       | 3422.96           | 3403.61        |
-| Random Forest Regressor | 679.13            | 2314.292       |
+| Name                        | Training Set Score | Test Set Score |
+|-----------------------------|-------------------|---------------|
+| Linear Regression           | 3422.96           | 3403.61       |
+| Random Forest Regressor     | 679.13            | 2314.29       |
+| Polynomial Linear Regession | 2535.72           | 3095.49       |
 
