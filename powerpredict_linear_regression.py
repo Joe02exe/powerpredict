@@ -8,9 +8,20 @@ import sklearn.linear_model
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import make_pipeline
 from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Ridge
 import numpy as np
 from sklearn.tree import DecisionTreeRegressor
 from sklearn import dummy
+import os
+import pwd
+import time
+import datetime
+import pandas as pd
+from sklearn.tree import plot_tree
+import matplotlib.pyplot as plt
+import seaborn as sns
+import category_encoders as ce
+
 
 DATASET_PATH = "powerpredict_dataset.csv"
 
@@ -28,57 +39,57 @@ def drop_object_columns(df):
 
 DOC = drop_object_columns
 
+allData = pd.concat([X, y], axis=1)
 
-def predict_show_metrics(name, reg, metric):
-    print(f"{name}", metric(y, reg.predict(DOC(X))))
+# with this we can encode the so called "string- features"
+# we use this function instead of DOC, because we do not want to drop columns
+encoder = ce.OrdinalEncoder()
 
+# Encode the categorical variables
+data = encoder.fit_transform(allData)
 
-reg = sklearn.dummy.DummyRegressor()
-reg.fit(DOC(X), y)
-metric = sklearn.metrics.mean_absolute_error
+# Compute the correlation matrix
+correlation_matrix = data.corr()
 
-predict_show_metrics("Dummy", reg, metric)
+power_cons_corr = (
+    correlation_matrix["power_consumption"].abs().sort_values(ascending=False)
+)
+top_correlated_features = power_cons_corr[1:34].index.tolist()
 
-
-# This can be changed
-# Polynomial regression model
-
-
-# get features with the highest correlation
-power_cons_corr = DOC(powerpredict).corr()["power_consumption"]
-power_cons_corr_abs = abs(power_cons_corr).sort_values(ascending=False)[1:]
-highest_corr = power_cons_corr_abs[0:20].keys()
-x_filtered = powerpredict[highest_corr]
-print(x_filtered.shape)
+x_filtered = data[top_correlated_features]
+x_filtered = x_filtered.dropna()
 
 
 # linear regression with polynomial
-pol_reg_model = make_pipeline(PolynomialFeatures(2), LinearRegression())
+pol_reg_model = make_pipeline(PolynomialFeatures(2), Ridge())
 pol_reg_model.fit(x_filtered, y)
+# polynomial_features = PolynomialFeatures(degree=2)
+# x_polynomial = polynomial_features.fit_transform(x_filtered)
+# print("Shape of x_filtered:", x_filtered.shape)
+# print("Shape of x_polynomial:", x_polynomial.shape)
+# print(y.shape)
+# ridgeRegression = Ridge()
+# ridgeRegression.fit(x_filtered, y)
 
-# tree regression
-model = DecisionTreeRegressor()
-model.fit(x_filtered, y)
-print("model fitted")
 
-# Train Dataset Score: 3061.6933126681356
-# Test Dataset Score: 3181.6676929868504
-# Train Dataset Score: 17.286747383246727
-# Test Dataset Score: 2987.4145525455483
+# polynomial 3:
+# Train Dataset Score: 2063.555664003627
+# Test Dataset Score: 3257.2906929313135
 
-# random=44,
-# Train Dataset Score: 826.6064280458045
-# Test Dataset Score: 3034.3093991967244
+# model = DecisionTreeRegressor(min_samples_split=2)
+# model.fit(x_filtered, y)
 
 
 def leader_board_predict_fn(values):
-    print(values.shape)
 
-    values = DOC(values)
-    # YOUR CODE HERE (please remove 'raise NotImplementedError()')
-    x_filtered = values[highest_corr]
+    # Encode the categorical variables
+    values = encoder.fit_transform(values)
 
-    return pol_reg_model.predict(x_filtered)  # replace this with your implementation
+    values_filtered = values[top_correlated_features]
+
+    return pol_reg_model.predict(
+        values_filtered
+    )  # replace this with your implementation
 
 
 def get_score():
@@ -87,31 +98,24 @@ def get_score():
     """
 
     try:
+
         test_data = pd.read_csv(DATASET_PATH)
         X_test = test_data.drop(columns=["power_consumption"])
         y_test = test_data[["power_consumption"]]
 
         y_predicted = leader_board_predict_fn(X_test)
         dataset_score = sklearn.metrics.mean_absolute_error(y_test, y_predicted)
-    except Exception:
+    except Exception as e:
+        print(e)
         dataset_score = float("nan")
     print(f"Train Dataset Score: {dataset_score}")
-
-    import os
-    import pwd
-    import time
-    import datetime
-    import pandas as pd
 
     user_id = pwd.getpwuid(os.getuid()).pw_name
     curtime = time.time()
     dt_now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
 
     try:
-        HIDDEN_DATASET_PATH = os.path.expanduser("/data/mlproject22-test-data/")
-        test_data = pd.read_csv(
-            os.path.join(HIDDEN_DATASET_PATH, "hidden_powerpredict.csv.zip")
-        )
+        test_data = pd.read_csv("hidden_powerpredict.csv")
         X_test = test_data.drop(columns=["power_consumption"])
         y_test = test_data[["power_consumption"]]
         y_predicted = leader_board_predict_fn(X_test)
@@ -127,6 +131,7 @@ def get_score():
         )
     except Exception as e:
         err = str(e)
+        print(err)
         score_dict = dict(
             score_hidden=float("nan"),
             score_train=dataset_score,
