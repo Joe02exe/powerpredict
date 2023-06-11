@@ -54,14 +54,14 @@ correlation_matrix = data.corr()
 power_cons_corr = (
     correlation_matrix["power_consumption"].abs().sort_values(ascending=False)
 )
-top_correlated_features = power_cons_corr[1:30].index.tolist()
+top_correlated_features = power_cons_corr[1:34].index.tolist()
 
 x_filtered = data[top_correlated_features]
 x_filtered = x_filtered.dropna()
 
 
 # linear regression with polynomial
-pol_reg_model = make_pipeline(PolynomialFeatures(2), LinearRegression())
+pol_reg_model = make_pipeline(PolynomialFeatures(2), Ridge())
 pol_reg_model.fit(x_filtered, y)
 # polynomial_features = PolynomialFeatures(degree=2)
 # x_polynomial = polynomial_features.fit_transform(x_filtered)
