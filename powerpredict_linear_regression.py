@@ -54,23 +54,27 @@ correlation_matrix = data.corr()
 power_cons_corr = (
     correlation_matrix["power_consumption"].abs().sort_values(ascending=False)
 )
-top_correlated_features = power_cons_corr[1:50].index.tolist()
+top_correlated_features = power_cons_corr[1:30].index.tolist()
 
 x_filtered = data[top_correlated_features]
 x_filtered = x_filtered.dropna()
 
 
 # linear regression with polynomial
-# pol_reg_model = make_pipeline(PolynomialFeatures(2), LinearRegression())
-# pol_reg_model.fit(x_filtered, y)
-polynomial_features = PolynomialFeatures(degree=2)
-x_polynomial = polynomial_features.fit_transform(x_filtered)
+pol_reg_model = make_pipeline(PolynomialFeatures(2), LinearRegression())
+pol_reg_model.fit(x_filtered, y)
+# polynomial_features = PolynomialFeatures(degree=2)
+# x_polynomial = polynomial_features.fit_transform(x_filtered)
 # print("Shape of x_filtered:", x_filtered.shape)
 # print("Shape of x_polynomial:", x_polynomial.shape)
 # print(y.shape)
-ridgeRegression = Ridge()
-ridgeRegression.fit(x_filtered, y)
+# ridgeRegression = Ridge()
+# ridgeRegression.fit(x_filtered, y)
 
+
+# polynomial 3:
+# Train Dataset Score: 2063.555664003627
+# Test Dataset Score: 3257.2906929313135
 
 # model = DecisionTreeRegressor(min_samples_split=2)
 # model.fit(x_filtered, y)
@@ -83,7 +87,7 @@ def leader_board_predict_fn(values):
 
     values_filtered = values[top_correlated_features]
 
-    return ridgeRegression.predict(
+    return pol_reg_model.predict(
         values_filtered
     )  # replace this with your implementation
 
