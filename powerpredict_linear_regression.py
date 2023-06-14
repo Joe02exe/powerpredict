@@ -28,6 +28,9 @@ DATASET_PATH = "powerpredict_dataset.csv"
 powerpredict = pd.read_csv(DATASET_PATH)
 X = powerpredict.drop(columns=["power_consumption"])
 y = powerpredict[["power_consumption"]]
+X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
+    X, y, test_size=0.33, random_state=42
+)
 
 
 def drop_object_columns(df):
@@ -39,7 +42,7 @@ def drop_object_columns(df):
 
 DOC = drop_object_columns
 
-allData = pd.concat([X, y], axis=1)
+allData = pd.concat([X_train, y_train], axis=1)
 
 # with this we can encode the so called "string- features"
 # we use this function instead of DOC, because we do not want to drop columns
@@ -54,15 +57,16 @@ correlation_matrix = data.corr()
 power_cons_corr = (
     correlation_matrix["power_consumption"].abs().sort_values(ascending=False)
 )
-top_correlated_features = power_cons_corr[1:34].index.tolist()
+top_correlated_features = power_cons_corr[1:36].index.tolist()
 
 x_filtered = data[top_correlated_features]
 x_filtered = x_filtered.dropna()
 
 
 # linear regression with polynomial
-pol_reg_model = make_pipeline(PolynomialFeatures(2), Ridge())
-pol_reg_model.fit(x_filtered, y)
+pol_reg_model = make_pipeline(PolynomialFeatures(2), LinearRegression())
+pol_reg_model.fit(x_filtered, y_train)
+print(pol_reg_model.score(x_filtered, y_train))
 # polynomial_features = PolynomialFeatures(degree=2)
 # x_polynomial = polynomial_features.fit_transform(x_filtered)
 # print("Shape of x_filtered:", x_filtered.shape)
@@ -92,9 +96,60 @@ def leader_board_predict_fn(values):
     )  # replace this with your implementation
 
 
+def get_values():
+    """
+    Function to compute scores for train and test datasets (for the real training set).
+    """
+
+    try:
+        y_predicted = leader_board_predict_fn(x_filtered)
+        dataset_score = sklearn.metrics.mean_absolute_error(y_train, y_predicted)
+        print(
+            "score normal train 1:"
+            + str(sklearn.metrics.explained_variance_score(y_train, y_predicted))
+        )
+    except Exception as e:
+        print(e)
+        dataset_score = float("nan")
+    print(f"Train Dataset Score: {dataset_score}")
+
+    user_id = pwd.getpwuid(os.getuid()).pw_name
+    curtime = time.time()
+    dt_now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    try:
+        y_predicted = leader_board_predict_fn(X_test)
+        hiddendataset_score = sklearn.metrics.mean_absolute_error(y_test, y_predicted)
+        print(
+            "score normal train 2:"
+            + str(sklearn.metrics.explained_variance_score(y_test, y_predicted))
+        )
+
+        print(f"Test Dataset Score: {hiddendataset_score}")
+        score_dict = dict(
+            score_hidden=hiddendataset_score,
+            score_train=dataset_score,
+            unixtime=curtime,
+            user=user_id,
+            dt=dt_now,
+            comment="",
+        )
+    except Exception as e:
+        err = str(e)
+        print(err)
+        score_dict = dict(
+            score_hidden=float("nan"),
+            score_train=dataset_score,
+            unixtime=curtime,
+            user=user_id,
+            dt=dt_now,
+            comment=err,
+        )
+
+
 def get_score():
     """
-    Function to compute scores for train and test datasets.
+    Function to compute scores for train and test datasets (for the hidden training set).
     """
 
     try:
@@ -105,6 +160,11 @@ def get_score():
 
         y_predicted = leader_board_predict_fn(X_test)
         dataset_score = sklearn.metrics.mean_absolute_error(y_test, y_predicted)
+        print(
+            "score normal score 1:"
+            + str(sklearn.metrics.explained_variance_score(y_test, y_predicted))
+        )
+
     except Exception as e:
         print(e)
         dataset_score = float("nan")
@@ -120,6 +180,11 @@ def get_score():
         y_test = test_data[["power_consumption"]]
         y_predicted = leader_board_predict_fn(X_test)
         hiddendataset_score = sklearn.metrics.mean_absolute_error(y_test, y_predicted)
+        print(
+            "score normal score 2:"
+            + str(sklearn.metrics.explained_variance_score(y_test, y_predicted))
+        )
+
         print(f"Test Dataset Score: {hiddendataset_score}")
         score_dict = dict(
             score_hidden=hiddendataset_score,
@@ -152,4 +217,5 @@ def get_score():
     pd.DataFrame([score_dict]).to_csv("powerpredict.csv", index=False)
 
 
+get_values()
 get_score()
