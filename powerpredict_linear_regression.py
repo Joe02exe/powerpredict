@@ -2,24 +2,16 @@ import pandas as pd
 import os
 import sklearn
 import sklearn.metrics
-import pathlib
 import sklearn.model_selection
 import sklearn.linear_model
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import make_pipeline
 from sklearn.linear_model import LinearRegression
-from sklearn.linear_model import Ridge
-import numpy as np
-from sklearn.tree import DecisionTreeRegressor
-from sklearn import dummy
 import os
 import pwd
 import time
 import datetime
 import pandas as pd
-from sklearn.tree import plot_tree
-import matplotlib.pyplot as plt
-import seaborn as sns
 import category_encoders as ce
 
 
@@ -50,6 +42,8 @@ encoder = ce.OrdinalEncoder()
 
 # Encode the categorical variables
 data = encoder.fit_transform(allData)
+mean_value = data.mean()
+data = data.fillna(mean_value)
 
 # Compute the correlation matrix
 correlation_matrix = data.corr()
@@ -60,28 +54,12 @@ power_cons_corr = (
 top_correlated_features = power_cons_corr[1:36].index.tolist()
 
 x_filtered = data[top_correlated_features]
-x_filtered = x_filtered.dropna()
 
 
-# linear regression with polynomial
+# linear regression with polynomial features
 pol_reg_model = make_pipeline(PolynomialFeatures(2), LinearRegression())
 pol_reg_model.fit(x_filtered, y_train)
 print(pol_reg_model.score(x_filtered, y_train))
-# polynomial_features = PolynomialFeatures(degree=2)
-# x_polynomial = polynomial_features.fit_transform(x_filtered)
-# print("Shape of x_filtered:", x_filtered.shape)
-# print("Shape of x_polynomial:", x_polynomial.shape)
-# print(y.shape)
-# ridgeRegression = Ridge()
-# ridgeRegression.fit(x_filtered, y)
-
-
-# polynomial 3:
-# Train Dataset Score: 2063.555664003627
-# Test Dataset Score: 3257.2906929313135
-
-# model = DecisionTreeRegressor(min_samples_split=2)
-# model.fit(x_filtered, y)
 
 
 def leader_board_predict_fn(values):
@@ -91,9 +69,7 @@ def leader_board_predict_fn(values):
 
     values_filtered = values[top_correlated_features]
 
-    return pol_reg_model.predict(
-        values_filtered
-    )  # replace this with your implementation
+    return pol_reg_model.predict(values_filtered)
 
 
 def get_values():
@@ -104,6 +80,9 @@ def get_values():
     try:
         y_predicted = leader_board_predict_fn(x_filtered)
         dataset_score = sklearn.metrics.mean_absolute_error(y_train, y_predicted)
+        dataset_mean = y_test.mean().values[0]
+        dataset_accuracy = (1 - dataset_score / dataset_mean) * 100
+        print(dataset_accuracy)
         print(
             "score normal train 1:"
             + str(sklearn.metrics.explained_variance_score(y_train, y_predicted))
@@ -113,38 +92,22 @@ def get_values():
         dataset_score = float("nan")
     print(f"Train Dataset Score: {dataset_score}")
 
-    user_id = pwd.getpwuid(os.getuid()).pw_name
-    curtime = time.time()
-    dt_now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-
     try:
         y_predicted = leader_board_predict_fn(X_test)
         hiddendataset_score = sklearn.metrics.mean_absolute_error(y_test, y_predicted)
+        dataset_mean = y_test.mean().values[0]
+        dataset_accuracy = (1 - hiddendataset_score / dataset_mean) * 100
+        print(dataset_accuracy)
         print(
             "score normal train 2:"
             + str(sklearn.metrics.explained_variance_score(y_test, y_predicted))
         )
 
         print(f"Test Dataset Score: {hiddendataset_score}")
-        score_dict = dict(
-            score_hidden=hiddendataset_score,
-            score_train=dataset_score,
-            unixtime=curtime,
-            user=user_id,
-            dt=dt_now,
-            comment="",
-        )
+
     except Exception as e:
         err = str(e)
         print(err)
-        score_dict = dict(
-            score_hidden=float("nan"),
-            score_train=dataset_score,
-            unixtime=curtime,
-            user=user_id,
-            dt=dt_now,
-            comment=err,
-        )
 
 
 def get_score():
@@ -160,6 +123,10 @@ def get_score():
 
         y_predicted = leader_board_predict_fn(X_test)
         dataset_score = sklearn.metrics.mean_absolute_error(y_test, y_predicted)
+        dataset_mean = y_test.mean().values[0]
+        dataset_accuracy = (1 - dataset_score / dataset_mean) * 100
+        print(dataset_accuracy)
+
         print(
             "score normal score 1:"
             + str(sklearn.metrics.explained_variance_score(y_test, y_predicted))
@@ -180,41 +147,19 @@ def get_score():
         y_test = test_data[["power_consumption"]]
         y_predicted = leader_board_predict_fn(X_test)
         hiddendataset_score = sklearn.metrics.mean_absolute_error(y_test, y_predicted)
+        dataset_mean = y_test.mean().values[0]
+        dataset_accuracy = (1 - hiddendataset_score / dataset_mean) * 100
+        print(dataset_accuracy)
+
         print(
             "score normal score 2:"
             + str(sklearn.metrics.explained_variance_score(y_test, y_predicted))
         )
 
         print(f"Test Dataset Score: {hiddendataset_score}")
-        score_dict = dict(
-            score_hidden=hiddendataset_score,
-            score_train=dataset_score,
-            unixtime=curtime,
-            user=user_id,
-            dt=dt_now,
-            comment="",
-        )
     except Exception as e:
         err = str(e)
         print(err)
-        score_dict = dict(
-            score_hidden=float("nan"),
-            score_train=dataset_score,
-            unixtime=curtime,
-            user=user_id,
-            dt=dt_now,
-            comment=err,
-        )
-
-    # if list(pathlib.Path(os.getcwd()).parents)[0].name == 'source':
-    #    print("we are in the source directory... replacing values.")
-    #    print(pd.DataFrame([score_dict]))
-    #    score_dict["score_hidden"] = -1
-    #    score_dict["score_train"] = -1
-    #    print("new values:")
-    #    print(pd.DataFrame([score_dict]))
-
-    pd.DataFrame([score_dict]).to_csv("powerpredict.csv", index=False)
 
 
 get_values()
