@@ -8,16 +8,11 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import make_pipeline
 from sklearn.linear_model import LinearRegression
 from sklearn import preprocessing
-from sklearn.metrics import explained_variance_score
 from sklearn.model_selection import cross_val_score
 
 
 import os
-import pwd
-import time
-import datetime
 import pandas as pd
-import category_encoders as ce
 
 N = 21
 
@@ -59,7 +54,7 @@ x_filtered = allData[selected_columns]
 X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(
     x_filtered, y, test_size=0.20, random_state=22
 )
-# K Nearest neighbors regression
+# linear regression
 neigh = make_pipeline(PolynomialFeatures(2), LinearRegression())
 neigh.fit(X_train, y_train)
 y_predicted = neigh.predict(X_test)
