@@ -1,9 +1,9 @@
-In this zip-file, we have the report for our Machine Learning Project: Powerpredict.
+In this zip-file, we have the Scripts for our Machine Learning Project: Powerpredict.
+The report (PDF) was already submitted in the "Report-submission menu"
 
 This zip-File contains:
-- report (PDF)
-- Powerpredict-Notebook
-- 2 executable jobLib-Files for our models (as a backup if the ones, produced, would somehow not work)
+- this text-File
+- 2 executable jobLib-Files for our models
 - k_nearest_enighbors_implementation
 
 
