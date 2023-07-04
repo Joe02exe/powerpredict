@@ -1,0 +1,14 @@
+In this zip-file, we have the report for our Machine Learning Project: Powerpredict.
+
+This zip-File contains:
+- report (PDF)
+- Powerpredict-Notebook
+- 2 executable jobLib-Files for our models (as a backup if the ones, produced, would somehow not work)
+- k_nearest_enighbors_implementation
+
+
+We added one additional implementation, because it is the one that outperforms the other two implementations,
+but the library that is used in this implementation is not available on "ifi-europa.uibk.ac.at". We are not sure,
+if the implementation is correct due to the encoder, but we decided to just give it a shot and submit this one too,
+because the performance was quite good (train: 954.26, test: 1881.62, hidden-test: 2503.17), -> but also Overfitting.
+Additional Information: You need the CSV-Files to test the implementation!
