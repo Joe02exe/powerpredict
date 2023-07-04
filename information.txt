@@ -3,7 +3,8 @@ The report (PDF) was already submitted in the "Report-submission menu"
 
 This zip-File contains:
 - this text-File
-- 2 executable jobLib-Files for our models
+- Notebook (Inside the second box a variable can be set to either use the linear regression model or the regression trees)
+- 2 executable jobLib-Files for our models (as a Backup if the notebook would somehow not work)
 - k_nearest_enighbors_implementation
 
 
