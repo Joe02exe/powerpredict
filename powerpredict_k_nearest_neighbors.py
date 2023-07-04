@@ -60,10 +60,6 @@ neigh = KNeighborsRegressor(n_neighbors=2)
 neigh.fit(X_train, y_train)
 
 
-# print(neigh.score(X_train, y_train))
-# print(neigh.score(X_test, y_test))
-
-
 def leader_board_predict_fn(values):
 
     # encode the values

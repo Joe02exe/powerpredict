@@ -1,0 +1,15 @@
+In this zip-file, we have the Scripts for our Machine Learning Project: Powerpredict.
+The report (PDF) was already submitted in the "Report-submission menu"
+
+This zip-File contains:
+- this text-File
+- Notebook (Inside the second box a variable can be set to either use the linear regression model or the regression trees)
+- 2 executable jobLib-Files for our models (as a Backup if the notebook would somehow not work)
+- k_nearest_enighbors_implementation
+
+
+We added one additional implementation, because it is the one that outperforms the other two implementations,
+but the library that is used in this implementation is not available on "ifi-europa.uibk.ac.at". We are not sure,
+if the implementation is correct due to the encoder, but we decided to just give it a shot and submit this one too,
+because the performance was quite good (train: 954.26, test: 1881.62, hidden-test: 2503.17), -> but also Overfitting.
+Additional Information: You need the CSV-Files to test the implementation!
