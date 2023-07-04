@@ -24,6 +24,6 @@ and one column that shows the **power consumption**.
 | Linear Regression            | 3422.96            | 3403.61        |   ?          |
 | Polynomial Linear Regession  | 3152.17            | 3162.33        |   3320.30    |
 | K Nearest Neighbors Regrssor | 954.26             | 1881.62        |   2503.17    |
-| Random Forest Regressor      | 679.13             | 2314.29        |   ?          |
+| Random Forest Regressor      | 679.13             | 2314.29        |   3477.68    |
 
 
